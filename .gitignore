@@ -1,4 +1,4 @@
-data/
 venv/
 models/
 **__pycache__/
+.vscode/
