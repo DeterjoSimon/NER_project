@@ -563,7 +563,7 @@ if __name__ == "__main__":
 
     # set up GPU device
     device = torch.device("cuda")
-    torch.cuda.set_device(args.gpu_device)
+    # torch.cuda.set_device(args.gpu_device)
 
     # setup logger settings
     if args.test_only:
