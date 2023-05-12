@@ -4,3 +4,7 @@ models/
 .vscode/
 data/
 models-5-1-inter/
+*.err
+*.out
+archive/
+debug/

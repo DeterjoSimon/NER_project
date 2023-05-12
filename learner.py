@@ -27,7 +27,7 @@ class Learner(nn.Module):
     def __init__(
         self,
         bert_model,
-        label_list,
+        label_list, # BIOES
         freeze_layer,
         logger,
         lr_meta,
@@ -55,8 +55,8 @@ class Learner(nn.Module):
         self.py_alias = py_alias
         self.entity_types = args.entity_types
         self.is_debug = args.debug
-        self.train_mode = args.train_mode
-        self.eval_mode = args.eval_mode
+        self.train_mode = args.train_mode # add, span or type
+        self.eval_mode = args.eval_mode # add, two-stage
         self.model_dir = model_dir
         self.args = args
         self.freeze_layer = freeze_layer
@@ -614,6 +614,9 @@ class Learner(nn.Module):
         shutil.copy(config_name, config_name.replace("tmp", mode))
 
     def load_model(self, mode: str = "all"):
+        """
+        Simplu loads a pre-trained model
+        """
         if not self.model_dir:
             return
         model_dir = self.model_dir
