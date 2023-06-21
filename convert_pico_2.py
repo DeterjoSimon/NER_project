@@ -12,7 +12,7 @@ from spacy.language import Language
 from spacy.lang.en import English
 
 nlp = spacy.load("en_core_web_sm")
-random.seed(10)
+random.seed(13) # 10 Originally # 50 Second # 13 Third
 
 # Add custom sentence segmentation rule
 @Language.component("custom_segmenter")
@@ -107,14 +107,16 @@ def process_pico_files(txt_file: str, ann_file: str) -> Dict[str, List[Tuple[Lis
 def generate_episodes(dataset: Dict[str, List[Tuple[List[str], List[str]]]], N: int, K: int, amount):
     episodes = []
 
-    # Filter the classes with at least 2 * N annotations
+    # Filter the classes with at least 2 * K annotations
     available_classes = [cls for cls, annotations in dataset.items() if len(annotations) >= 2 * K]
     with tqdm(total=amount) as pbar:
         for _ in range(amount):
             # Randomly select N classes
-            selected_classes = random.sample(available_classes, N)
-
-            # Sample N annotations for support and query sets from each class
+            try:
+                selected_classes = random.sample(available_classes, N)
+            except:
+                pdb.set_trace()
+            # Sample K annotations for support and query sets from each class
             support = {"word": [], "label": []}
             query = {"word": [], "label": []}
             valid_episode = True
@@ -125,13 +127,14 @@ def generate_episodes(dataset: Dict[str, List[Tuple[List[str], List[str]]]], N: 
                 if len(annotations) >= 2*K:
                 # Randomly sample annotations without replacement for support and query sets
                     selected_annotations = random.sample(annotations, 2 * K)
-                    support_example = selected_annotations[:N]
-                    query_example = selected_annotations[N:]
+                    support_example = selected_annotations[:K]
+                    query_example = selected_annotations[K:]
                     support_example = [item for sublist in support_example for item in sublist]
                     query_example = [item for sublist in query_example for item in sublist]
                 else:
                     valid_episode = False
                     available_classes.remove(cls)
+                    print(f'We have {len(available_classes)} classes left')
                     pbar.set_postfix({"Elements Left": len(available_classes)})
                     pbar.update(1)
                     break
@@ -139,16 +142,12 @@ def generate_episodes(dataset: Dict[str, List[Tuple[List[str], List[str]]]], N: 
                 if not valid_episode:
                     continue
             # Create an episode and append it to the episodes list
-                try:
-                    for words, labels in support_example:
-                        support["word"].append(words)
-                        support["label"].append(labels)
-                    for words, labels in query_example:
-                        query["word"].append(words)
-                        query["label"].append(labels)
-                except:
-                    a = 0
-            pbar.update(1)
+                for words, labels in support_example:
+                    support["word"].append(words)
+                    support["label"].append(labels)
+                for words, labels in query_example:
+                    query["word"].append(words)
+                    query["label"].append(labels)
             episodes.append({"support": support, "query": query, "types": selected_classes})
 
     return episodes
@@ -166,8 +165,8 @@ def split_dataset(data_path: str, N: int, K: int) -> Tuple[List[Dict], List[Dict
     dataset = defaultdict(list) # Dictionary of all the classes, for each class 
     # you have a list of sequences containing an abstract and a span annotation. 
     # FIXME: The data set has different kind of classes. 
-    if os.path.exists("data/pico_dict.pickle"):
-        with open("data/pico_dict.pickle", "rb") as f:
+    if os.path.exists("/work3/s174450/data/pico_dict.pickle"):
+        with open("/work3/s174450/data/pico_dict.pickle", "rb") as f:
             dataset = pickle.load(f)
     else:
         for file in tqdm(os.listdir(data_path), desc="Processing files"): # We process each text and ann file 
@@ -183,25 +182,44 @@ def split_dataset(data_path: str, N: int, K: int) -> Tuple[List[Dict], List[Dict
                         dataset[key].append(tag_dictionary[key])
                     else:
                         dataset[key] = [tag_dictionary[key]]
-        with open("data/pico_dict.pickle", "wb") as f:
+        with open("/work3/s174450/data/pico_dict.pickle", "wb") as f:
             pickle.dump(dataset, f)
 
-
     
     
-    pdb.set_trace()
     class_list = list(dataset.keys()) # ['T1', 'T2', 'T3' ..., 'T26']
+    if (N==7 and K==5) or (N==7 and K>=2) or K>=5:
+        strings_to_remove = ['iv-cont-q1', 'cv-cont-q1', 'iv-cont-q3', 'cv-cont-q3']
+        class_list = list(filter(lambda x: x not in strings_to_remove, class_list))
     random.shuffle(class_list)
     num_classes = len(class_list)
 
-    train_classes = class_list[:num_classes // 2] # 13
-    valid_classes = class_list[num_classes // 2:(num_classes * 3) // 4] # 6
-    test_classes = class_list[(num_classes * 3) // 4:] # 7
+    # For N = 5 and 6
+    train_classes = class_list[:num_classes // 2] # 13 For N=5 | 
+    valid_classes = class_list[num_classes // 2:(num_classes * 3) // 4] # 6 | 
+    test_classes = class_list[(num_classes * 3) // 4:] # 7 | 6
+    pdb.set_trace()
 
+    # For N = 7 and 8
+    if (N==7 and K==5) or (N==7 and K>=2):
+        train_classes = class_list[:8] # 8  
+        valid_classes = class_list[8:15] # 7
+        test_classes = class_list[15:] # 7
+    elif N==7 and K==1:
+        train_classes = class_list[:10] # 10  
+        valid_classes = class_list[10:18] # 8
+        test_classes = class_list[18:] # 8
+    
+    # For N = 10
+    # train_classes = class_list
     train_data = {k: dataset[k] for k in train_classes} # Make a dictionary of each class
+
     valid_data = {k: dataset[k] for k in valid_classes}
     test_data = {k: dataset[k] for k in test_classes}
 
+    if N==10:
+        train_episodes = generate_episodes(train_data, N, K, 26000)
+        return train_episodes, [], []
     train_episodes = generate_episodes(train_data, N, K, 20000)
     valid_episodes = generate_episodes(valid_data, N, K, 1000)
     test_episodes = generate_episodes(test_data, N, K, 5000)
@@ -214,10 +232,20 @@ def save_jsonl(data: List[Dict], file_path: str):
             f.write(json.dumps(item) + "\n")
 
 if __name__ == "__main__":
-    data_dir = "data/pico-corpus"
-    N = 5
-    K = 1
-    train_episodes, valid_episodes, test_episodes = split_dataset(data_dir, N, K)
-    save_jsonl(train_episodes, f'data/pico-episode-data/pico_{N}_{K}_train.jsonl')
-    save_jsonl(valid_episodes, f'data/pico-episode-data/pico_{N}_{K}_dev.jsonl')
-    save_jsonl(test_episodes, f'data/pico-episode-data/pico_{N}_{K}_test.jsonl')
+    data_dir = "/work3/s174450/data/pico-corpus"
+    N_list = [5, 5]# 6, 7, 7, 7, 7]
+    K_list = [1, 5]# 1, 1, 2, 3, 5]
+    for i in range(len(N_list)):
+        N = N_list[i]
+        K = K_list[i]
+        print(f"Processing N:{N} and K:{K}")
+        train_episodes, valid_episodes, test_episodes = split_dataset(data_dir, N, K)
+        if N==10:
+            save_jsonl(train_episodes[:20000], f'data/pico-episode-data/pico_{N}_{K}_train.jsonl')
+            save_jsonl(train_episodes[20000:21000], f'data/pico-episode-data/pico_{N}_{K}_dev.jsonl')
+            save_jsonl(train_episodes[21000:], f'data/pico-episode-data/pico_{N}_{K}_test.jsonl')
+            pdb.set_trace()
+        else:
+            save_jsonl(train_episodes, f'/work3/s174450/data/pico-episode-data/pico_{N}_{K}_train.jsonl')
+            save_jsonl(valid_episodes, f'/work3/s174450/data/pico-episode-data/pico_{N}_{K}_dev.jsonl')
+            save_jsonl(test_episodes, f'/work3/s174450/data/pico-episode-data/pico_{N}_{K}_test.jsonl')

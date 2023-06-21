@@ -3,15 +3,19 @@ import matplotlib.pyplot as plt
 import pickle 
 import os
 import json
+import pandas as pd
 from collections import Counter
 import pdb
 
-if os.path.exists("data/pico_dict.pickle"):
-    with open("data/pico_dict.pickle", "rb") as f:
+if os.path.exists("../data/pico_dict.pickle"):
+    with open("../data/pico_dict.pickle", "rb") as f:
         dataset = pickle.load(f)
 
+random.seed(50)
 # Shuffle and split the dataset into train_data, valid_data, and test_data
 class_list = list(dataset.keys())
+# strings_to_remove = ['iv-cont-q1', 'cv-cont-q1', 'iv-cont-q3', 'cv-cont-q3']
+# class_list = list(filter(lambda x: x not in strings_to_remove, class_list))
 random.shuffle(class_list)
 num_classes = len(class_list)
 
@@ -29,6 +33,53 @@ valid_counts = {k: len(v) for k, v in valid_data.items()}
 test_counts = {k: len(v) for k, v in test_data.items()}
 
 counts_dict = {key: len(annotations) for key, annotations in dataset.items()}
+
+def plot_freq_5_5():
+    # Define the JSONL files
+    jsonl_files = {
+        'Train': '/work3/s174450/data/pico-episode-data/inter/pico_5_5_train_50.jsonl',
+        'Dev': '/work3/s174450/data/pico-episode-data/inter/pico_5_5_dev_50.jsonl',
+        'Test': '/work3/s174450/data/pico-episode-data/inter/pico_5_5_test_50.jsonl'
+    }
+
+    counts_dict = {
+        'Train': train_counts,
+        'Dev': valid_counts,
+        'Test': test_counts
+    }
+    # Reverse the domain mapping to create an entity-domain mapping
+    entity_domain_mapping = {entity: domain for domain, entities in domains.items() for entity in entities}
+    # Initialize a dictionary for storing the domain counts
+    domain_counts = {domain: [0, 0, 0] for domain in domains}
+    # Parse the JSONL files
+    for dataset, dict_counts in counts_dict .items():
+        for key, item in dict_counts.items():
+            if key in entity_domain_mapping:
+                domain_counts[entity_domain_mapping[key]][list(counts_dict.keys()).index(dataset)] += item
+    # for dataset, jsonl_file in jsonl_files.items():
+    #     with open(jsonl_file, 'r') as file:
+    #         for line in file:
+    #             # Parse the episode
+    #             episode = json.loads(line)
+    #             # Count the instances of each domain
+    #             for entity in episode['types']:
+    #                 if entity in entity_domain_mapping:
+    #                     domain_counts[entity_domain_mapping[entity]][list(jsonl_files.keys()).index(dataset)] += 10
+    # Convert the domain count dictionary to a DataFrame
+    pdb.set_trace()
+    df = pd.DataFrame.from_dict(domain_counts, orient='index', columns=jsonl_files.keys())
+    df = df.drop("O", errors='ignore')
+    # Create the bar plot
+    df.plot(kind='bar', stacked=False, figsize=(10, 7), rot=0)
+
+    # Set the title and labels
+    plt.title("Fine-grained Counts in Different Datasets for 5-Way 5-Shots")
+    plt.xlabel("")
+    plt.ylabel("Number of unique annotations")
+
+    # Show the plot
+    plt.savefig('images/barplot_5_1_50.png')
+
 
 def plot_train_dev_test_freq():
     """
@@ -204,4 +255,5 @@ def plot_pico_freq_jsonl():
 
 
 if __name__ == '__main__':
-    plot_pico_freq_jsonl()
+    domains = json.load(open("/work3/s174450/data/entity_types_pico.json"))
+    plot_freq_5_5()

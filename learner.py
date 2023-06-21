@@ -9,7 +9,7 @@ import numpy
 import numpy as np
 import torch
 from torch import nn
-
+import pdb
 import joblib
 from modeling import BertForTokenClassification_
 from transformers import CONFIG_NAME, PYTORCH_PRETRAINED_BERT_CACHE, WEIGHTS_NAME
@@ -510,7 +510,6 @@ class Learner(nn.Module):
                             item_id, corpus.n_total, time.time() - t_tmp
                         )
                     )
-
         eval_loss = eval_loss / nb_eval_steps
         if self.is_debug:
             joblib.dump([targets, predes, spans], "debug/f1.pkl")
@@ -795,7 +794,9 @@ class Learner(nn.Module):
         tp, fp, fn = 0, 0, 0
         for ii, jj in zip(targets, predes):
             ii, jj = set(ii), set(jj)
-            same = ii - (ii - jj)
+            # (ii - jj) Find the elements in target (ii) which are not in preds (jj)
+            # The result same is the elements common to both target and pred.
+            same = ii - (ii - jj) 
             tp += len(same)
             fn += len(ii - jj)
             fp += len(jj - ii)

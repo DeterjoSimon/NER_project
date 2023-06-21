@@ -8,3 +8,7 @@ models-5-1-inter/
 *.out
 archive/
 debug/
+checkpoint/
+images/
+logs_PROTO/
+models**/

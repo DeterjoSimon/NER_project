@@ -30,6 +30,7 @@ def get_data_path(args, train_mode: str):
         "FewNERD",
         "Domain",
         "Domain2",
+        "PICO",
     ], f"Dataset: {args.dataset} Not Support."
     if args.dataset == "FewNERD":
         return os.path.join(
@@ -55,6 +56,13 @@ def get_data_path(args, train_mode: str):
         return os.path.join(
             "domain2", "{}_{}_{}.json".format(train_mode, args.mode, args.K)
         )
+    elif args.dataset == "PICO":
+        return os.path.join(
+            args.data_path,
+            args.mode,
+            "{}_{}_{}_{}.jsonl".format("pico", args.N, args.K, train_mode)
+        )
+
 
 
 def replace_type_embedding(learner, args):
