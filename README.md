@@ -4,16 +4,28 @@
 
 ### Purpose
 
-Model a token classification problem in the context of randomized controlled trial literature to support evidence-based medicine. Apply and analyze results from deep learning models in the task of named entity recognition (NER). Finally assess and summarize the project results in relation to aims, methods and available data.
+In this study, we will examine the performance of two different models in the context of Few-shot learning. We will be looking at ProtoBert [ProtoBert](https://aclanthology.org/2022.acl-long.521) model, an extension based on prototypical networks supported on a BERT encoder [[1]](#1). Additionally, we will be comparing the performance of this latter with a more complicated model based on Meta-learning. Specifically, the Decomposed Meta-Learning algorithm presented by Ma et al. [[2]](#2). This much more complex approach sequentially addresses few-shot span detection and few-shot entity typing with two decomposed models. They then combine the two to make one predictor and perform NER. 
+
+In other words we aim to benchmark the performance of this decomposed meta-learning approach versus a more "simple" and straightforward implementation, like ProtoBert, in the few-shot NER setting. Specifically, we will be evaluating them on the PICO (Population, Intervention, Comparison, Outcome) Corpus, a collection of bio-medical research articles. We will also compare our results with Ma et al. on the Few-NERD [[3]](#3) data set with similar models. The primary objective of our research is to evaluate how well two models can perform an NER task on bio-medical texts in a Few-shot manner.
 
 ### Models considered to tackle this project:
 
-1. Bi-LSTM
-2. Transformer
+1. ProtoBERT
+2. Decomposed META-Learning
 
 ### Relevant articles
 
 - [Corpus for training to extract biomedical literature](https://aclanthology.org/2022.wiesp-1.4.pdf)
 - https://ieeexplore.ieee.org/document/9039685
 - [Survey on DL models for NER](https://arxiv.org/pdf/1603.01360.pdf)
-- [Span Extraction model](https://arxiv.org/pdf/2106.00978.pdf)
+
+## References
+
+<a id="1">[1]</a> 
+Jacob Devlin et al. “BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding”. In: Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers).
+
+<a id="2">[2]</a>
+Tingting Ma et al. “Decomposed Meta-Learning for Few-Shot Named Entity Recognition”. In: Findings of the Association for Computational Linguistics.
+
+<a id="3">[3]</a>
+Ning Ding et al. “Few-NERD: A Few-shot Named Entity Recognition Dataset”. In: Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing (Volume 1: Long Papers).
