@@ -1,10 +1,12 @@
 # NER_PROJECT
 
+The project paper can be viewed [Here]
+
 ## Deep Learning for data extraction in scientific literature
 
 ### Purpose
 
-In this study, we will examine the performance of two different models in the context of Few-shot learning. We will be looking at ProtoBert [ProtoBert](https://aclanthology.org/2022.acl-long.521) model, an extension based on prototypical networks supported on a BERT encoder [[1]](#1). Additionally, we will be comparing the performance of this latter with a more complicated model based on Meta-learning. Specifically, the Decomposed Meta-Learning algorithm presented by Ma et al. [[2]](#2). This much more complex approach sequentially addresses few-shot span detection and few-shot entity typing with two decomposed models. They then combine the two to make one predictor and perform NER. 
+In this study, we will examine the performance of two different models in the context of Few-shot learning. We will be looking at ProtoBert [ProtoBert](https://aclanthology.org/2022.acl-long.521) model, an extension based on prototypical networks supported on a BERT encoder [[1]](#1). Additionally, we will be comparing the performance of this latter with a more complicated model based on Meta-learning. Specifically, the Decomposed Meta-Learning (DML) algorithm presented by Ma et al. [[2]](#2). This much more complex approach sequentially addresses few-shot span detection and few-shot entity typing with two decomposed models. They then combine the two to make one predictor and perform NER. 
 
 In other words we aim to benchmark the performance of this decomposed meta-learning approach versus a more "simple" and straightforward implementation, like ProtoBert, in the few-shot NER setting. Specifically, we will be evaluating them on the PICO (Population, Intervention, Comparison, Outcome) Corpus, a collection of bio-medical research articles. We will also compare our results with Ma et al. on the Few-NERD [[3]](#3) data set with similar models. The primary objective of our research is to evaluate how well two models can perform an NER task on bio-medical texts in a Few-shot manner.
 
@@ -12,6 +14,10 @@ In other words we aim to benchmark the performance of this decomposed meta-learn
 
 1. ProtoBERT
 2. Decomposed META-Learning
+
+### Conclusion
+
+Our empirical results highlighted the effectiveness of the ProtoBERT model when tested on the PICO Corpus, showing robust generalization capabilities. However, the DML model performance seemed to be affected by its complexity, which may be a subject for further investigation. Overfitting due to over-specialization to the training data is one possible explanation, revealing an interesting trade-off between model complexity and generalizability. A finer investigation into how model complexity, the number of classes, and overfitting interplay could be a future research direction. Interestingly, we observed that the data quality and the class distribution could be another influencing factor for model performance. Investigating the knowledge correlation among entity types, as it pertains to knowledge transfer in few-shot learning, could be interesting to look at. Refining the class distribution to match the data set characteristics could also potentially improve model performance.
 
 ### Relevant articles
 
