@@ -1,6 +1,6 @@
 # NER_PROJECT
 
-The project paper can be viewed [Here]
+The project paper can be viewed [Here](Meta_Learning_Project-5.pdf)
 
 ## Deep Learning for data extraction in scientific literature
 
